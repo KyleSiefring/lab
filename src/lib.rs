@@ -30,6 +30,18 @@ fn rgb_to_xyz(rgb: &[u8; 3]) -> [f32; 3] {
     ]
 }
 
+fn rgb_to_xyz_f32(rgb: &[f32; 3]) -> [f32; 3] {
+    let r = rgb_to_xyz_map_f32(rgb[0]);
+    let g = rgb_to_xyz_map_f32(rgb[1]);
+    let b = rgb_to_xyz_map_f32(rgb[2]);
+
+    [
+        r*0.4124564390896921   + g*0.357576077643909 + b*0.18043748326639894,
+        r*0.21267285140562248  + g*0.715152155287818 + b*0.07217499330655958,
+        r*0.019333895582329317 + g*0.119192025881303 + b*0.9503040785363677,
+    ]
+}
+
 #[inline]
 fn rgb_to_xyz_map(c: u8) -> f32 {
     if c > 10 {
@@ -41,6 +53,19 @@ fn rgb_to_xyz_map(c: u8) -> f32 {
         c as f32 / D
     }
 }
+
+#[inline]
+fn rgb_to_xyz_map_f32(c: f32) -> f32 {
+    if c > 10./255. {
+        const A: f32 = 0.055;
+        const D: f32 = 1.055;
+        ((c as f32 + A) / D).powf(2.4)
+    } else {
+        const D: f32 = 12.92;
+        c as f32 / D
+    }
+}
+
 
 fn xyz_to_lab(xyz: [f32; 3]) -> Lab {
     let x = xyz_to_lab_map(xyz[0] / 0.95047);
@@ -126,6 +151,10 @@ impl Lab {
     /// ```
     pub fn from_rgb(rgb: &[u8; 3]) -> Self {
         xyz_to_lab(rgb_to_xyz(rgb))
+    }
+
+    pub fn from_rgb_f32(rgb: &[f32; 3]) -> Self {
+        xyz_to_lab(rgb_to_xyz_f32(rgb))
     }
 
     /// Constructs a new `Lab` from a four-element array of `u8`s
