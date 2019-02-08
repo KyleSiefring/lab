@@ -50,7 +50,7 @@ fn rgb_to_xyz_map(c: u8) -> f32 {
         ((c as f32 + A) / D).powf(2.4)
     } else {
         const D: f32 = 12.92 * 255.0;
-        c as f32 / D
+        c as f32 * D
     }
 }
 
@@ -58,19 +58,19 @@ fn rgb_to_xyz_map(c: u8) -> f32 {
 fn rgb_to_xyz_map_f32(c: f32) -> f32 {
     if c > 10./255. {
         const A: f32 = 0.055;
-        const D: f32 = 1.055;
-        ((c as f32 + A) / D).powf(2.4)
+        const D: f32 = 1.0 / 1.055;
+        ((c as f32 + A) * D).powf(2.4)
     } else {
-        const D: f32 = 12.92;
-        c as f32 / D
+        const D: f32 = 1.0 / 12.92;
+        c as f32 * D
     }
 }
 
 
 fn xyz_to_lab(xyz: [f32; 3]) -> Lab {
-    let x = xyz_to_lab_map(xyz[0] / 0.95047);
+    let x = xyz_to_lab_map(xyz[0] * (1.0 / 0.95047));
     let y = xyz_to_lab_map(xyz[1]);
-    let z = xyz_to_lab_map(xyz[2] / 1.08883);
+    let z = xyz_to_lab_map(xyz[2] * (1.0 / 1.08883));
 
     Lab {
         l: (116.0 * y) - 16.0,
@@ -84,7 +84,7 @@ fn xyz_to_lab_map(c: f32) -> f32 {
     if c > EPSILON {
         c.powf(1.0/3.0)
     } else {
-        (KAPPA * c + 16.0) / 116.0
+        (KAPPA * c + 16.0) * (1.0 / 116.0)
     }
 }
 
